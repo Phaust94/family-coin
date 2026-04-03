@@ -1,19 +1,50 @@
+version: '3.8'
+
 services:
-  family-geth:
+  # --- SERVICE 1: The Initializer ---
+  ledger-init:
+    image: ethereum/client-go:v1.13.15
+    container_name: family-ledger-init
+    # We mount the local folder where Coolify stores persistent data
+    volumes:
+      - ledger-data:/root/.ethereum
+      - ./genesis.json:/root/genesis.json
+    # No shell needed; we call the geth binary directly to init the genesis
+    command:
+      - init
+      - --datadir=/root/.ethereum
+      - /root/genesis.json
+    restart: "no" # This container runs, does its job, and stops.
+
+  # --- SERVICE 2: The Actual Node ---
+  ledger-node:
     image: ethereum/client-go:v1.13.15
     container_name: family-ledger
     restart: always
+    # This tells Coolify to start the init container first
+    depends_on:
+      ledger-init:
+        condition: service_started
     ports:
-      - "8545:8545" # RPC port for MetaMask
-      - "30303:30303" # P2P port
+      - "8545:8545"   # RPC for MetaMask
+      - "30303:30303" # P2P Connection
     volumes:
-      - ledger-data:/root/.ethereum # Where the ledger is saved
-      - ./genesis.json:/root/genesis.json
-      - ./geth-config.toml:/root/config.toml
-    # We use a custom command to initialize if the data folder is empty, then run
-    entrypoint: >
-      if [ ! -d /root/.ethereum/geth ]; then geth init --datadir /root/.ethereum /root/genesis.json; fi;
-      geth --config /root/config.toml --mine --miner.threads 1 --allow-insecure-unlock"
+      - ledger-data:/root/.ethereum
+      - ./password.txt:/root/password.txt
+    command:
+      - --datadir=/root/.ethereum
+      - --networkid=27744
+      - --mine
+      - --miner.gasprice=0
+      - --miner.etherbase=0x0aCa0B79de83a0761a5c57c8a1A239989cD254A6
+      - --unlock=0x0aCa0B79de83a0761a5c57c8a1A239989cD254A6
+      - --password=/root/password.txt
+      - --allow-insecure-unlock
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=*
+      - --http.vhosts=*
+      - --http.api=eth,net,web3,clique,miner
 
 volumes:
   ledger-data:
