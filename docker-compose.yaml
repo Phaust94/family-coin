@@ -63,7 +63,18 @@ services:
       - --http.addr=0.0.0.0
       - --http.corsdomain=*
       - --http.vhosts=*
-      - --http.api=eth,net,web3,clique,miner
+      - --http.api=eth,net,web3,clique,miner,debug,txpool
+
+  explorer:
+    image: otterscan/otterscan:v2.11.0
+    container_name: family-explorer
+    restart: always
+    ports:
+      - "3094:80"
+    # Otterscan works by the browser talking to the node.
+    # This environment variable tells the browser where the node is.
+    environment:
+      - ERIGON_URL=http://ledger-node:8545
 
 volumes:
   ledger-data:
