@@ -87,6 +87,7 @@ services:
       # 2026 v7 Requirement: Run migrations on start
       - MIGRATION_PRIMARY=true
       - ECTO_USE_SSL=false
+      - ETHEREUM_JSONRPC_VARIANT=geth
 
   explorer-frontend:
     image: ghcr.io/blockscout/frontend:v2.3.5
