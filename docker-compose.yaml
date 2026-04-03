@@ -55,8 +55,8 @@ services:
       - --networkid=27744
       - --mine
       - --miner.gasprice=0
-      - --miner.etherbase=0x0aCa0B79de83a0761a5c57c8a1A239989cD254A6
-      - --unlock=0x0aCa0B79de83a0761a5c57c8a1A239989cD254A6
+      - --miner.etherbase=0x0aca0b79de83a0761a5c57c8a1a239989cd254a6
+      - --unlock=0x0aca0b79de83a0761a5c57c8a1a239989cd254a6
       - --password=/root/password.txt
       - --allow-insecure-unlock
       - --http
