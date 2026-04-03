@@ -6,8 +6,6 @@ services:
     ports:
       - "8545:8545" # RPC port for MetaMask
       - "30303:30303" # P2P port
-    environment:
-      - UNLOCK_PASSWORD
     volumes:
       - ledger-data:/root/.ethereum # Where the ledger is saved
       - ./genesis.json:/root/genesis.json
