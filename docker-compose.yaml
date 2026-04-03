@@ -41,9 +41,9 @@ services:
     container_name: family-ledger
     restart: always
     # This tells Coolify to start the init container first
-    depends_on:
-      ledger-import:
-        condition: service_completed_successfully # Waits for the key to be imported
+#    depends_on:
+#      ledger-import:
+#        condition: service_completed_successfully # Waits for the key to be imported
     ports:
       - "8545:8545"   # RPC for MetaMask
       - "30303:30303" # P2P Connection
