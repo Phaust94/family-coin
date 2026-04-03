@@ -66,6 +66,8 @@ services:
       - --http.api=eth,net,web3,clique,miner,debug,txpool
 
   explorer-backend:
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     image: ghcr.io/blockscout/blockscout:9.0.2
     container_name: blockscout-backend
     # THIS IS THE FIX: You must tell the Elixir app to start
