@@ -74,7 +74,7 @@ services:
     # Otterscan works by the browser talking to the node.
     # This environment variable tells the browser where the node is.
     environment:
-      - ERIGON_URL=http://ledger-node:8545
+      - ERIGON_URL
 
 volumes:
   ledger-data:
