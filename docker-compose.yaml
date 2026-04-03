@@ -1,0 +1,21 @@
+services:
+  family-geth:
+    image: ethereum/client-go:v1.17.2
+    container_name: family-ledger
+    restart: always
+    ports:
+      - "8545:8545" # RPC port for MetaMask
+      - "30303:30303" # P2P port
+    environment:
+      - UNLOCK_PASSWORD
+    volumes:
+      - ledger-data:/root/.ethereum # Where the ledger is saved
+      - ./genesis.json:/root/genesis.json:ro
+      - ./geth-config.toml:/root/config.toml:ro
+    # We use a custom command to initialize if the data folder is empty, then run
+    entrypoint: >
+      sh -c "echo \"$UNLOCK_PASSWORD\" > /root/password.txt; if [ ! -d /root/.ethereum/geth ]; then geth init --datadir /root/.ethereum /root/genesis.json; fi;
+      geth --config /root/config.toml --mine --miner.threads 1 --allow-insecure-unlock"
+
+volumes:
+  ledger-data:
