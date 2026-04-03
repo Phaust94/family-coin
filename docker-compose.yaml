@@ -71,7 +71,12 @@ services:
     image: ghcr.io/blockscout/blockscout:9.0.2
     container_name: blockscout-backend
     # THIS IS THE FIX: You must tell the Elixir app to start
-    command: [ "/app/bin/blockscout", "start" ]
+    command:
+      - sh
+      - -c
+      - |
+        /app/bin/blockscout eval "Explorer.ReleaseTasks.create_and_migrate" &&
+        /app/bin/blockscout start
     environment:
       - DATABASE_URL
       - ETHEREUM_JSONRPC_HTTP_URL=http://ledger-node:8545
