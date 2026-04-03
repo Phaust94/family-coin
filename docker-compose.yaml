@@ -10,8 +10,8 @@ services:
       - UNLOCK_PASSWORD
     volumes:
       - ledger-data:/root/.ethereum # Where the ledger is saved
-      - ./genesis.json:/root/genesis.json:ro
-      - ./geth-config.toml:/root/config.toml:ro
+      - ./genesis.json:/root/genesis.json
+      - ./geth-config.toml:/root/config.toml
     # We use a custom command to initialize if the data folder is empty, then run
     entrypoint: >
       sh -c "echo \"$UNLOCK_PASSWORD\" > /root/password.txt; if [ ! -d /root/.ethereum/geth ]; then geth init --datadir /root/.ethereum /root/genesis.json; fi;
