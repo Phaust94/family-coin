@@ -66,7 +66,7 @@ services:
       - --http.api=eth,net,web3,clique,miner,debug,txpool
 
   explorer-backend:
-    image: ghcr.io/blockscout/blockscout:7.0.2
+    image: ghcr.io/blockscout/blockscout:9.0.2
     container_name: blockscout-backend
     # THIS IS THE FIX: You must tell the Elixir app to start
     command: [ "/app/bin/blockscout", "start" ]
@@ -81,7 +81,7 @@ services:
       - MIGRATION_PRIMARY=true
 
   explorer-frontend:
-    image: ghcr.io/blockscout/frontend:7.0.2
+    image: ghcr.io/blockscout/frontend:v2.3.5
     container_name: blockscout-frontend
     depends_on:
       - explorer-backend
