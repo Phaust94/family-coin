@@ -2,19 +2,19 @@ version: '3.8'
 
 services:
 #   --- SERVICE 1: The Initializer ---
-#  ledger-init:
-#    image: ethereum/client-go:v1.13.15
-#    container_name: family-ledger-init
-#    # We mount the local folder where Coolify stores persistent data
-#    volumes:
-#      - ledger-data:/root/.ethereum
-#      - ./genesis.json:/root/genesis.json
-#    # No shell needed; we call the geth binary directly to init the genesis
-#    command:
-#      - init
-#      - --datadir=/root/.ethereum
-#      - /root/genesis.json
-#    restart: "no" # This container runs, does its job, and stops.
+  ledger-init:
+    image: ethereum/client-go:v1.13.15
+    container_name: family-ledger-init
+    # We mount the local folder where Coolify stores persistent data
+    volumes:
+      - ledger-data:/root/.ethereum
+      - ./genesis.json:/root/genesis.json
+    # No shell needed; we call the geth binary directly to init the genesis
+    command:
+      - init
+      - --datadir=/root/.ethereum
+      - /root/genesis.json
+    restart: "no" # This container runs, does its job, and stops.
 #
 #  ledger-import:
 #    image: ethereum/client-go:v1.13.15
@@ -44,6 +44,9 @@ services:
 #    depends_on:
 #      ledger-import:
 #        condition: service_completed_successfully # Waits for the key to be imported
+    depends_on:
+      ledger-init:
+        condition: service_completed_successfully # Waits for the key to be imported
     ports:
       - "8545:8545"   # RPC for MetaMask
       - "30303:30303" # P2P Connection
@@ -64,7 +67,7 @@ services:
       - --http.corsdomain=*
       - --http.vhosts=*
       - --http.api=eth,net,web3,clique,miner,debug,txpool
-
+      - --gcmode archive
   explorer-backend:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
