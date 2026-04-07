@@ -67,7 +67,7 @@ services:
       - --http.corsdomain=*
       - --http.vhosts=*
       - --http.api=eth,net,web3,clique,miner,debug,txpool
-      - --gcmode archive
+      - --gcmode=archive
   explorer-backend:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
