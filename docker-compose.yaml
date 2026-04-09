@@ -69,6 +69,7 @@ services:
       - --http.api=eth,net,web3,clique,miner,debug,txpool
       - --txlookuplimit=0
       - --gcmode=archive
+      - --nodiscover
   explorer-backend:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
