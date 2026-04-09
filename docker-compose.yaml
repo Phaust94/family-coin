@@ -70,6 +70,7 @@ services:
       - --txlookuplimit=0
       - --gcmode=archive
       - --nodiscover
+      - --maxpeers 0
   explorer-backend:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
