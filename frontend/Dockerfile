@@ -2,12 +2,16 @@ FROM ghcr.io/blockscout/frontend:v2.3.5
 
 USER root
 
-RUN apk add --no-cache nginx
+RUN apk add --no-cache nginx && \
+    chown -R node:node /app
 
-COPY nginx.conf /etc/nginx/http.d/default.conf
+COPY --chown=node:node nginx.conf /etc/nginx/http.d/default.conf
 
-EXPOSE 80
+RUN mkdir -p /var/lib/nginx/tmp /var/lib/nginx/logs && \
+    chown -R node:node /var/lib/nginx
 
 USER node
+
+EXPOSE 80
 
 CMD sh -c "npm start & nginx -g 'daemon off;'"
