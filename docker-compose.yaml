@@ -103,8 +103,6 @@ services:
       - "3000:80"
     environment:
       - NEXT_PUBLIC_NETWORK_ID=27744
-      - NEXT_PUBLIC_API_PROTOCOL=https
-      - NEXT_PUBLIC_API_HOST=family-coin-explorer.frakt.al
       - NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL=MASH
       - NEXT_PUBLIC_NETWORK_CURRENCY_NAME=No i masz
     depends_on:
