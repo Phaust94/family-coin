@@ -7,8 +7,8 @@ RUN apk add --no-cache nginx && \
 
 COPY --chown=node:node nginx.conf /etc/nginx/http.d/default.conf
 
-RUN mkdir -p /var/lib/nginx/tmp /var/lib/nginx/logs && \
-    chown -R node:node /var/lib/nginx
+RUN mkdir -p /var/lib/nginx/tmp /var/lib/nginx/logs /var/log/nginx && \
+    chown -R node:node /var/lib/nginx /var/log/nginx
 
 USER node
 
