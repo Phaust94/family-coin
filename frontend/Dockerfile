@@ -14,4 +14,4 @@ USER node
 
 EXPOSE 80
 
-CMD bash -c "HOST=0.0.0.0 PORT=3000 . ./entrypoint.sh node server.js & nginx -g 'daemon off;'"
+CMD bash -c "HOST=0.0.0.0 PORT=3000 node server.js --hostname 0.0.0.0 & nginx -g 'daemon off;'"
