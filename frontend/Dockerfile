@@ -14,4 +14,4 @@ USER node
 
 EXPOSE 80
 
-CMD . ./entrypoint.sh & nginx -g 'daemon off;'
+CMD bash -c ". ./entrypoint.sh & nginx -g 'daemon off;'"
