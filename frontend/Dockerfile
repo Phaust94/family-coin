@@ -14,4 +14,4 @@ USER node
 
 EXPOSE 80
 
-CMD sh -c "npm start & nginx -g 'daemon off;'"
+CMD sh -c "node node_modules/next/dist/bin/next start & nginx -g 'daemon off;'"
