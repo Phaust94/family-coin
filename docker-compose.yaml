@@ -1,38 +1,46 @@
 version: '3.8'
-# Family chain (MASH). Geth removed the Clique engine in v1.14, so this no longer
-# runs a PoA signer. Instead the node runs in --dev mode, where geth's built-in
-# simulated beacon seals a block every --dev.period seconds. That means: no
-# signer key in the keystore, no --unlock, no password file.
 services:
+  ledger-init:
+    image: 'ethereum/client-go:v1.17.10'
+    container_name: family-ledger-init
+    volumes:
+      - 'ledger-data:/root/.ethereum'
+      - './genesis.json:/root/genesis.json'
+    command:
+      - init
+      - '--datadir=/root/.ethereum'
+      - /root/genesis.json
+    restart: 'no'
   ledger-node:
     image: 'ethereum/client-go:v1.17.10'
     container_name: family-ledger
     restart: always
+    depends_on:
+      ledger-init:
+        condition: service_completed_successfully
     ports:
       - '8545:8545'
+      - '30303:30303'
     volumes:
       - 'ledger-data:/root/.ethereum'
-      - './genesis.json:/root/genesis.json:ro'
+      - './password.txt:/root/password.txt'
     command:
-      - sh
-      - '-c'
-      - |
-        # Idempotent: re-running init on an already initialized datadir is a no-op.
-        # If this fails, the node must not start (otherwise geth would silently
-        # fall back to its built-in dev chain with chain id 1337).
-        geth init --datadir /root/.ethereum /root/genesis.json &&
-        exec geth \
-          --dev \
-          --datadir /root/.ethereum \
-          --dev.period=60 \
-          --networkid=27744 \
-          --http \
-          --http.addr=0.0.0.0 \
-          --http.corsdomain=* \
-          --http.vhosts=* \
-          --http.api=eth,net,web3,debug,txpool \
-          --miner.gasprice=1000000 \
-          --gcmode=archive
+      - '--datadir=/root/.ethereum'
+      - '--networkid=27744'
+      - '--mine'
+      - '--miner.gasprice=0'
+      - '--miner.etherbase=0x0aca0b79de83a0761a5c57c8a1a239989cd254a6'
+      - '--unlock=0x0aca0b79de83a0761a5c57c8a1a239989cd254a6'
+      - '--password=/root/password.txt'
+      - '--allow-insecure-unlock'
+      - '--http'
+      - '--http.addr=0.0.0.0'
+      - '--http.corsdomain=*'
+      - '--http.vhosts=*'
+      - '--http.api=eth,net,web3,clique,miner,debug,txpool'
+      - '--txlookuplimit=0'
+      - '--gcmode=archive'
+      - '--nodiscover'
   explorer-backend:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
@@ -53,8 +61,6 @@ services:
       - ECTO_USE_SSL=false
       - ETHEREUM_JSONRPC_VARIANT=geth
       - INDEXER_CATCHUP_INTERVAL=5000
-    depends_on:
-      - ledger-node
   explorer-frontend:
     build:
       context: ./frontend
