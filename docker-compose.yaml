@@ -3,6 +3,12 @@ version: '3.8'
 # runs a PoA signer. Instead the node runs in --dev mode, where geth's built-in
 # simulated beacon seals a block every --dev.period seconds (300 = 5 minutes).
 # That means: no signer key in the keystore, no --unlock, no password file.
+#
+# --keystore points at a dedicated dir on purpose: dev mode always picks the first
+# keystore account as its developer account and unlocks it with an empty password.
+# If it sees the legacy Clique signer key (/root/.ethereum/keystore), unlocking
+# fails with "could not decrypt key with given password". A separate empty dir
+# makes geth provision its own throwaway account and leaves the old key alone.
 services:
   ledger-node:
     image: 'ethereum/client-go:v1.17.10'
@@ -27,6 +33,7 @@ services:
         exec geth \
           --dev \
           --datadir /root/.ethereum \
+          --keystore=/root/.ethereum/dev-keystore \
           --dev.period=300 \
           --networkid=27744 \
           --http \
