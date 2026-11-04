@@ -1,114 +1,73 @@
 version: '3.8'
-
+# Family chain (MASH). Geth removed the Clique engine in v1.14, so this no longer
+# runs a PoA signer. Instead the node runs in --dev mode, where geth's built-in
+# simulated beacon seals a block every --dev.period seconds (300 = 5 minutes).
+# That means: no signer key in the keystore, no --unlock, no password file.
 services:
-#   --- SERVICE 1: The Initializer ---
-  ledger-init:
-    image: ethereum/client-go:v1.13.15
-    container_name: family-ledger-init
-    # We mount the local folder where Coolify stores persistent data
-    volumes:
-      - ledger-data:/root/.ethereum
-      - ./genesis.json:/root/genesis.json
-    # No shell needed; we call the geth binary directly to init the genesis
-    command:
-      - init
-      - --datadir=/root/.ethereum
-      - /root/genesis.json
-    restart: "no" # This container runs, does its job, and stops.
-#
-#  ledger-import:
-#    image: ethereum/client-go:v1.13.15
-#    container_name: family-ledger-import
-#    depends_on:
-#      ledger-init:
-#        condition: service_started
-#    volumes:
-#      - ledger-data:/root/.ethereum
-#      - ./pkey.txt:/root/pkey.txt:ro
-#      - ./password.txt:/root/password.txt:ro
-#    # This command imports the key and encrypts it into the keystore
-#    command:
-#      - account
-#      - import
-#      - --datadir=/root/.ethereum
-#      - --password=/root/password.txt
-#      - /root/pkey.txt
-#    restart: "no"
-
-  # --- SERVICE 2: The Actual Node ---
   ledger-node:
-    image: ethereum/client-go:v1.13.15
+    image: 'ethereum/client-go:v1.17.10'
     container_name: family-ledger
     restart: always
-    # This tells Coolify to start the init container first
-#    depends_on:
-#      ledger-import:
-#        condition: service_completed_successfully # Waits for the key to be imported
-    depends_on:
-      ledger-init:
-        condition: service_completed_successfully # Waits for the key to be imported
     ports:
-      - "8545:8545"   # RPC for MetaMask
-      - "30303:30303" # P2P Connection
+      - '8545:8545'
     volumes:
-      - ledger-data:/root/.ethereum
-      - ./password.txt:/root/password.txt
+      - 'ledger-data:/root/.ethereum'
+      - './genesis.json:/root/genesis.json:ro'
     command:
-      - --datadir=/root/.ethereum
-      - --networkid=27744
-      - --mine
-      - --miner.gasprice=0
-      - --miner.etherbase=0x0aca0b79de83a0761a5c57c8a1a239989cd254a6
-      - --unlock=0x0aca0b79de83a0761a5c57c8a1a239989cd254a6
-      - --password=/root/password.txt
-      - --allow-insecure-unlock
-      - --http
-      - --http.addr=0.0.0.0
-      - --http.corsdomain=*
-      - --http.vhosts=*
-      - --http.api=eth,net,web3,clique,miner,debug,txpool
-      - --txlookuplimit=0
-      - --gcmode=archive
-      - --nodiscover
+      - sh
+      - '-c'
+      - |
+        # Idempotent: re-running init on an already initialized datadir is a no-op.
+        # If this fails, the node must not start (otherwise geth would silently
+        # fall back to its built-in dev chain with chain id 1337).
+        geth init --datadir /root/.ethereum /root/genesis.json &&
+        exec geth \
+          --dev \
+          --datadir /root/.ethereum \
+          --dev.period=300 \
+          --networkid=27744 \
+          --http \
+          --http.addr=0.0.0.0 \
+          --http.corsdomain=* \
+          --http.vhosts=* \
+          --http.api=eth,net,web3,debug,txpool \
+          --miner.gasprice=1000000 \
+          --gcmode=archive
   explorer-backend:
     extra_hosts:
       - 'host.docker.internal:host-gateway'
-    image: ghcr.io/blockscout/blockscout:9.0.2
+    image: 'ghcr.io/blockscout/blockscout:9.0.2'
     container_name: blockscout-backend
-    # THIS IS THE FIX: You must tell the Elixir app to start
     command:
       - sh
-      - -c
-      - |
-        /app/bin/blockscout eval "Explorer.ReleaseTasks.create_and_migrate" &&
-        /app/bin/blockscout start
+      - '-c'
+      - "/app/bin/blockscout eval \"Explorer.ReleaseTasks.create_and_migrate\" &&\n/app/bin/blockscout start\n"
     environment:
       - DATABASE_URL
-      - ETHEREUM_JSONRPC_HTTP_URL=http://ledger-node:8545
-      - ETHEREUM_JSONRPC_TRACE_URL=http://ledger-node:8545
+      - 'ETHEREUM_JSONRPC_HTTP_URL=http://ledger-node:8545'
+      - 'ETHEREUM_JSONRPC_TRACE_URL=http://ledger-node:8545'
       - CHAIN_ID=27744
       - COIN=MASH
       - NETWORK=Family
-      # 2026 v7 Requirement: Run migrations on start
       - MIGRATION_PRIMARY=true
       - ECTO_USE_SSL=false
       - ETHEREUM_JSONRPC_VARIANT=geth
       - INDEXER_CATCHUP_INTERVAL=5000
-
+    depends_on:
+      - ledger-node
   explorer-frontend:
     build:
       context: ./frontend
     container_name: blockscout-frontend
     ports:
-      - "3000:80"
+      - '3000:80'
     environment:
       - NEXT_PUBLIC_NETWORK_ID=27744
       - NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL=MASH
-      - NEXT_PUBLIC_NETWORK_CURRENCY_NAME=No i masz
+      - 'NEXT_PUBLIC_NETWORK_CURRENCY_NAME=No i masz'
       - HOST=0.0.0.0
       - PORT=3000
     depends_on:
       - explorer-backend
-
 volumes:
-  ledger-data:
+  ledger-data: null
