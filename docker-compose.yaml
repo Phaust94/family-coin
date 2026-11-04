@@ -13,9 +13,12 @@ services:
     volumes:
       - 'ledger-data:/root/.ethereum'
       - './genesis.json:/root/genesis.json:ro'
-    command:
-      - sh
+    # The geth image sets ENTRYPOINT ["geth"], so the shell has to be installed
+    # as the entrypoint; a plain `command: [sh, -c, ...]` would run `geth sh -c ...`.
+    entrypoint:
+      - /bin/sh
       - '-c'
+    command:
       - |
         # Idempotent: re-running init on an already initialized datadir is a no-op.
         # If this fails, the node must not start (otherwise geth would silently
@@ -28,8 +31,8 @@ services:
           --networkid=27744 \
           --http \
           --http.addr=0.0.0.0 \
-          --http.corsdomain=* \
-          --http.vhosts=* \
+          --http.corsdomain='*' \
+          --http.vhosts='*' \
           --http.api=eth,net,web3,debug,txpool \
           --miner.gasprice=1000000 \
           --gcmode=archive
