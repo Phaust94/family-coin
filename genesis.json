@@ -9,14 +9,18 @@
     "constantinopleBlock": 0,
     "petersburgBlock": 0,
     "istanbulBlock": 0,
-    "clique": {
-      "period": 60,
-      "epoch": 30000
-    }
+    "muirGlacierBlock": 0,
+    "berlinBlock": 0,
+    "londonBlock": 0,
+    "arrowGlacierBlock": 0,
+    "grayGlacierBlock": 0,
+    "mergeNetsplitBlock": 0,
+    "terminalTotalDifficulty": 0,
+    "shanghaiTime": 0
   },
-  "difficulty": "1",
+  "difficulty": "0",
   "gasLimit": "8000000",
-  "extradata": "0x00000000000000000000000000000000000000000000000000000000000000000aCa0B79de83a0761a5c57c8a1A239989cD254A60000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "extradata": "0x",
   "alloc": {
     "0x0aCa0B79de83a0761a5c57c8a1A239989cD254A6": { "balance": "1000000000000000000000000" }
   }
