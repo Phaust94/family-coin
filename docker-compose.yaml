@@ -62,7 +62,9 @@ services:
       - MIGRATION_PRIMARY=true
       - ECTO_USE_SSL=false
       - ETHEREUM_JSONRPC_VARIANT=geth
-      - INDEXER_CATCHUP_INTERVAL=5000
+      - INDEXER_CATCHUP_INTERVAL=50000
+      - INDEXER_EMPTY_BLOCKS_SANITIZER_INTERVAL=5m
+      - INDEXER_DISABLE_EMPTY_BLOCKS_SANITIZER=true
     depends_on:
       - ledger-node
   explorer-frontend:
